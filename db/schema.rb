@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_03_184346) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_03_190935) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -33,6 +33,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_03_184346) do
     t.string "location_planet"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "ship_id"
+    t.index ["ship_id"], name: "index_pilots_on_ship_id"
   end
 
   create_table "resources", force: :cascade do |t|
@@ -48,7 +50,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_03_184346) do
     t.integer "weight_capacity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "pilot_id"
+    t.index ["pilot_id"], name: "index_ships_on_pilot_id"
   end
 
   add_foreign_key "contracts", "resources", column: "payload_id"
+  add_foreign_key "pilots", "ships"
+  add_foreign_key "ships", "pilots"
 end
