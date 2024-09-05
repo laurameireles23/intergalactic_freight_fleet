@@ -25,6 +25,18 @@ class PilotsController < ApplicationController
     end
   end
 
+  def travel
+    pilot = Pilot.find(params[:id])
+    destination_planet = params[:destination_planet]
+    service = TravelService.new(pilot, destination_planet)
+
+    if service.call
+      render json: { message: "Travel to #{destination_planet} successful!" }, status: :ok
+    else
+      render json: { errors: pilot.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def pilots_params
