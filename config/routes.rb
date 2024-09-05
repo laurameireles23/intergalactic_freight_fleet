@@ -9,6 +9,8 @@ Rails.application.routes.draw do
   resources :contracts, only: [:create]
   resources :resources, only: [:create]
 
+  post 'pilots/:id/travel', to: 'pilots#travel', as: 'pilot_travel'
+
   # Defines the root path route ("/")
   # root "posts#index"
 end
