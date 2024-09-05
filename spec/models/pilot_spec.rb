@@ -55,4 +55,50 @@ RSpec.describe Pilot, type: :model do
       expect(pilot).to_not be_valid
     end
   end
+
+  describe '#travel_to' do
+    let(:pilot) do
+      Pilot.create(
+        pilot_certification: '123456-x',
+        name: 'John Doe',
+        age: 35,
+        credits: 100,
+        location_planet: 'Andvari'
+      )
+    end
+
+    let!(:ship) do
+      Ship.create(
+        fuel_capacity: 100,
+        fuel_level: 50,
+        weight_capacity: 1000,
+        pilot: pilot
+      )
+    end
+
+    context 'when travel is blocked due to obstacles' do
+      it 'adds an error and returns false' do
+        expect(pilot.travel_to('Deméter')).to be false
+        expect(pilot.errors[:base]).to include('Travel from Andvari to Deméter is not possible due to obstacles.')
+      end
+    end
+
+    context 'when there is not enough fuel' do
+      before { ship.update(fuel_level: 10) }
+
+      it 'adds an error and returns false' do
+        expect(pilot.travel_to('Calas')).to be false
+        expect(pilot.errors[:base]).to include('Not enough fuel to travel from Andvari to Calas.')
+      end
+    end
+
+    context 'when travel is successful' do
+      it 'updates the ship’s fuel and the pilot’s location' do
+        expect(pilot.travel_to('Calas')).to be true
+        pilot.reload
+        expect(pilot.location_planet).to eq('Calas')
+        expect(pilot.ship.fuel_level).to eq(27)
+      end
+    end
+  end
 end
