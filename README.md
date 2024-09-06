@@ -36,7 +36,7 @@ Make sure to have the following dependencies installed:
 
     ```bash
     git clone git@github.com:laurameireles23/intergalactic_freight_fleet.git
-    cd transport_system_api
+    cd intergalactic_freight_fleet
     ```
 
 2. Install the required gems:
