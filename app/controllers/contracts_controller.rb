@@ -11,6 +11,21 @@ class ContractsController < ApplicationController
     end
   end
 
+  def accept_contract_and_pay_pilot
+    contract = Contract.find(params[:id])
+    pilot = Pilot.find(params[:pilot_id])
+
+    if contract.can_accept_contract?(pilot)
+      contract.complete_contract(pilot)
+
+      render json: { message: "Contract accepted and completed by #{pilot.name}!" }, status: :ok
+    else
+      render json: {
+        errors: "Contract to travel from #{contract.origin_planet} to #{contract.destination_planet} is not possible"
+      }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def contract_params
