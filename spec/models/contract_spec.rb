@@ -90,4 +90,114 @@ RSpec.describe Contract, type: :model do
       expect(Contract.statuses).to eq({'pending' => 0, 'in_progress' => 1, 'completed' => 2, 'canceled' => 3})
     end
   end
+
+  describe '#can_accept_contract?' do
+    let(:pilot) do
+      Pilot.create(
+        pilot_certification: '123456-x',
+        name: 'John Doe',
+        age: 35,
+        credits: 0,
+        location_planet: 'Andvari'
+      )
+    end
+
+    let(:ship) do
+      Ship.create(
+        fuel_capacity: 100,
+        fuel_level: 50,
+        weight_capacity: 1000,
+        pilot: pilot
+      )
+    end
+
+    let(:resource) do
+      Resource.create(
+        name: 'Water',
+        weight: 10
+      )
+    end
+
+    let(:contract) do
+      Contract.create(
+        description: 'Contract description',
+        origin_planet: 'Andvari',
+        destination_planet: 'Calas',
+        value: 100,
+        pilot: pilot,
+        status: :pending,
+        resource: resource
+      )
+    end
+
+    before do
+      pilot.update!(ship: ship)
+    end
+
+    context 'when the contract is acceptable' do
+      it 'returns true' do
+        expect(contract.can_accept_contract?(pilot)).to be true
+      end
+    end
+
+    context 'when the contract is not acceptable' do
+      it 'returns false if the ship cannot load the resource' do
+        allow(pilot.ship).to receive(:can_load?).and_return(false)
+
+        expect(contract.can_accept_contract?(pilot)).to be false
+      end
+    end
+  end
+
+  describe '#complete_contract' do
+    let(:pilot) do
+      Pilot.create(
+        pilot_certification: '123456-x',
+        name: 'John Doe',
+        age: 35,
+        credits: 0,
+        location_planet: 'Andvari'
+      )
+    end
+
+    let(:ship) do
+      Ship.create!(
+        fuel_capacity: 100,
+        fuel_level: 50,
+        weight_capacity: 1000,
+        pilot: pilot
+      )
+    end
+
+    let(:resource) do
+      Resource.create!(
+        name: 'Water',
+        weight: 10,
+        fuel_needed: 10
+      )
+    end
+
+    let(:contract) do
+      Contract.create(
+        description: 'Contract description',
+        origin_planet: 'Andvari',
+        destination_planet: 'Calas',
+        value: 100,
+        pilot: pilot,
+        status: :pending,
+        resource: resource
+      )
+    end
+
+    it 'completes the contract, updates the location, and pays the pilot' do
+      pilot.update!(ship_id: ship.id)
+
+      contract.complete_contract(pilot)
+      contract.reload
+      pilot.reload
+
+      expect(contract.status).to eq('completed')
+      expect(pilot.credits).to eq(contract.value)
+    end
+  end
 end
