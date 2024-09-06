@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   resources :resources, only: [:create]
 
   post 'pilots/:id/travel', to: 'pilots#travel', as: 'pilot_travel'
+  post 'contracts/:id/accept', to: 'contracts#accept', as: 'accept_contract'
 
   # Defines the root path route ("/")
   # root "posts#index"
