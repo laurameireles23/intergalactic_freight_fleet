@@ -36,4 +36,35 @@ class Pilot < ApplicationRecord
       true
     end
   end
+
+  def find_alternative_route(from_planet, to_planet)
+    FUEL_COSTS[from_planet].each do |intermediate_planet, fuel_needed_to_intermediate|
+      next if fuel_needed_to_intermediate == 'X'
+
+      fuel_needed_from_intermediate = FUEL_COSTS[intermediate_planet][to_planet]
+
+      next if fuel_needed_from_intermediate == 'X'
+
+      total_fuel_needed = fuel_needed_to_intermediate + fuel_needed_from_intermediate
+
+      return {
+        path: [from_planet, intermediate_planet, to_planet],
+        fuel_needed: total_fuel_needed
+      }
+    end
+
+    nil
+  end
+
+  def on_contract_origin_planet?(destination)
+    location_planet == destination
+  end
+
+  def update_location(new_planet)
+    update!(location_planet: new_planet)
+  end
+
+  def pay_pilot(value)
+    update!(credits: credits + value)
+  end
 end

@@ -101,4 +101,101 @@ RSpec.describe Pilot, type: :model do
       end
     end
   end
+
+  describe '#find_alternative_route' do
+    let(:pilot) do
+      Pilot.create(
+        pilot_certification: '123456-x',
+        name: 'John Doe',
+        age: 35,
+        credits: 100,
+        location_planet: 'Andvari'
+      )
+    end
+
+    let!(:ship) do
+      Ship.create(
+        fuel_capacity: 100,
+        fuel_level: 50,
+        weight_capacity: 1000,
+        pilot: pilot
+      )
+    end
+
+    before do
+      pilot.update!(ship: ship)
+    end
+
+    it 'returns a valid alternative route' do
+      route = pilot.find_alternative_route('Andvari', 'Calas')
+
+      expect(route).not_to be_nil
+      expect(route[:path]).to eq(['Andvari', 'Água', 'Calas'])
+    end
+  end
+
+  describe '#on_contract_origin_planet?' do
+    let(:pilot) do
+      Pilot.create(
+        pilot_certification: '123456-x',
+        name: 'John Doe',
+        age: 35,
+        credits: 100,
+        location_planet: 'Andvari'
+      )
+    end
+
+    let!(:ship) do
+      Ship.create(
+        fuel_capacity: 100,
+        fuel_level: 50,
+        weight_capacity: 1000,
+        pilot: pilot
+      )
+    end
+
+    before do
+      pilot.update!(ship: ship)
+    end
+
+    it 'returns true if the pilot is on the contract origin planet' do
+      expect(pilot.on_contract_origin_planet?('Andvari')).to be true
+    end
+
+    it 'returns false if the pilot is not on the contract origin planet' do
+      expect(pilot.on_contract_origin_planet?('Calas')).to be false
+    end
+  end
+
+  describe '#pay_pilot' do
+    let(:pilot) do
+      Pilot.create(
+        pilot_certification: '123456-x',
+        name: 'John Doe',
+        age: 35,
+        credits: 100,
+        location_planet: 'Andvari'
+      )
+    end
+
+    let!(:ship) do
+      Ship.create(
+        fuel_capacity: 100,
+        fuel_level: 50,
+        weight_capacity: 1000,
+        pilot: pilot
+      )
+    end
+
+    before do
+      pilot.update!(ship: ship)
+    end
+
+    it 'adds credits to the pilot' do
+      pilot.pay_pilot(100)
+      pilot.reload
+
+      expect(pilot.credits).to eq(200)
+    end
+  end
 end
