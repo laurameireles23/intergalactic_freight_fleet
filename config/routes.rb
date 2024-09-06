@@ -14,6 +14,10 @@ Rails.application.routes.draw do
     member do
       post 'accept_and_pay', to: 'contracts#accept_contract_and_pay_pilot'
     end
+
+    collection do
+      get 'report'
+    end
   end
 
   resources :ships do
