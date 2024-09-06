@@ -26,6 +26,12 @@ class ContractsController < ApplicationController
     end
   end
 
+  def report
+    report_data = Contract.generate_report
+
+    render json: report_data, status: :ok
+  end
+
   private
 
   def contract_params

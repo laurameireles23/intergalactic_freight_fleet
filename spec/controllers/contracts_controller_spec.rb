@@ -83,7 +83,7 @@ RSpec.describe ContractsController, type: :controller do
     end
   end
 
-  describe 'POST #accept_contract_and_pay_pilot' do
+  describe 'when a contract already exists' do
     let(:pilot) do
       Pilot.create(
         pilot_certification: '123456-x',
@@ -103,12 +103,8 @@ RSpec.describe ContractsController, type: :controller do
       )
     end
 
-    let(:resource) do
-      Resource.create(
-        name: 'water',
-        weight: 10
-      )
-    end
+    let!(:resource) { Resource.create!(name: 'water', weight: 10) }
+    let!(:resource2) { Resource.create!(name: 'food', weight: 20) }
 
     let(:contract) do
       Contract.create(
@@ -118,38 +114,83 @@ RSpec.describe ContractsController, type: :controller do
         value: 100,
         resource_id: resource.id,
         pilot_id: pilot.id,
-        status: :pending,
+        status: :pending
+      )
+    end
+
+    let!(:contract1) do
+      Contract.create!(
+        description: 'Water contract',
+        origin_planet: 'Andvari',
+        destination_planet: 'Calas',
+        value: 100,
+        pilot: pilot,
+        status: :completed,
         resource: resource
       )
     end
 
-    context 'when the contract can be accepted' do
-      before do
-        pilot.update!(ship: ship)
+    let!(:contract2) do
+      Contract.create!(
+        description: 'Food contract',
+        origin_planet: 'Calas',
+        destination_planet: 'Andvari',
+        value: 200,
+        pilot: pilot,
+        status: :completed,
+        resource: resource2
+      )
+    end
+
+    describe 'POST #accept_contract_and_pay_pilot' do
+      context 'when the contract can be accepted' do
+        before do
+          pilot.update!(ship: ship)
+        end
+
+        it 'completes the contract and pays the pilot' do
+          post :accept_contract_and_pay_pilot, params: { id: contract.id, pilot_id: pilot.id }
+          contract.reload
+          pilot.reload
+
+          expect(response).to have_http_status(:ok)
+          expect(contract.status).to eq('completed')
+          expect(pilot.credits).to eq(100)
+          expect(pilot.ship.fuel_level).to be < 50
+        end
       end
 
-      it 'completes the contract and pays the pilot' do
-        post :accept_contract_and_pay_pilot, params: { id: contract.id, pilot_id: pilot.id }
-        contract.reload
-        pilot.reload
+      context 'when the contract cannot be accepted' do
+        before do
+          allow_any_instance_of(Contract).to receive(:can_accept_contract?).and_return(false)
+        end
 
-        expect(response).to have_http_status(:ok)
-        expect(contract.status).to eq('completed')
-        expect(pilot.credits).to eq(100)
-        expect(pilot.ship.fuel_level).to be < 50
+        it 'returns an error message' do
+          post :accept_contract_and_pay_pilot, params: { id: contract.id, pilot_id: pilot.id }
+
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response.body).to include('Contract to travel from')
+        end
       end
     end
 
-    context 'when the contract cannot be accepted' do
-      before do
-        allow_any_instance_of(Contract).to receive(:can_accept_contract?).and_return(false)
-      end
+    describe 'GET #report' do
+      it 'returns a report of resources sent and received by each planet' do
+        get :report
 
-      it 'returns an error message' do
-        post :accept_contract_and_pay_pilot, params: { id: contract.id, pilot_id: pilot.id }
+        expected_report = {
+          'Andvari' => {
+            'sent' => { 'water' => 10 },
+            'received' => { 'food' => 20 }
+          },
+          'Calas' => {
+            'sent' => { 'food' => 20 },
+            'received' => { 'water' => 10 }
+          }
+        }
 
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.body).to include('Contract to travel from')
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)).to eq(expected_report)
       end
     end
   end
