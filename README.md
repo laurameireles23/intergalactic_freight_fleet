@@ -100,6 +100,7 @@ To run unit and integration tests, use the following command:
 
 ```bash
 bundle exec rspec
+```
 
 ## Endpoints
 
