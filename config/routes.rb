@@ -6,11 +6,15 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   resources :pilots, only: [:create]
-  resources :contracts, only: [:create]
+  post 'pilots/:id/travel', to: 'pilots#travel', as: 'pilot_travel'
+
   resources :resources, only: [:create]
 
-  post 'pilots/:id/travel', to: 'pilots#travel', as: 'pilot_travel'
-  post 'contracts/:id/accept', to: 'contracts#accept', as: 'accept_contract'
+  resources :contracts, only: [:create] do
+    member do
+      post 'accept_and_pay', to: 'contracts#accept_contract_and_pay_pilot'
+    end
+  end
 
   # Defines the root path route ("/")
   # root "posts#index"
