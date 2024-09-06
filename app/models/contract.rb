@@ -63,4 +63,23 @@ class Contract < ApplicationRecord
       pilot.pay_pilot(value)
     end
   end
+
+  def self.generate_report
+    planets_report = {}
+
+    all.each do |contract|
+      origin = contract.origin_planet
+      destination = contract.destination_planet
+      resource_name = contract.resource.name
+      resource_weight = contract.resource.weight
+
+      planets_report[origin] ||= { 'sent' => Hash.new(0), 'received' => Hash.new(0) }
+      planets_report[destination] ||= { 'sent' => Hash.new(0), 'received' => Hash.new(0) }
+
+      planets_report[origin]['sent'][resource_name] += resource_weight
+      planets_report[destination]['received'][resource_name] += resource_weight
+    end
+
+    planets_report
+  end
 end

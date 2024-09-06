@@ -200,4 +200,67 @@ RSpec.describe Contract, type: :model do
       expect(pilot.credits).to eq(contract.value)
     end
   end
+
+  describe '.generate_report' do
+    let!(:pilot) do
+      Pilot.create(
+        pilot_certification: '123456-x',
+        name: 'John Doe',
+        age: 35,
+        credits: 100,
+        location_planet: 'Andvari'
+      )
+    end
+
+    let!(:ship) do
+      Ship.create(
+        fuel_capacity: 100,
+        fuel_level: 50,
+        weight_capacity: 1000,
+        pilot: pilot
+      )
+    end
+
+    let!(:resource1) { Resource.create!(name: 'water', weight: 10) }
+    let!(:resource2) { Resource.create!(name: 'food', weight: 20) }
+
+    let!(:contract1) do
+      Contract.create(
+        description: 'Water contract',
+        origin_planet: 'Andvari',
+        destination_planet: 'Calas',
+        value: 100,
+        pilot: pilot,
+        status: :completed,
+        resource: resource1
+      )
+    end
+
+    let!(:contract2) do
+      Contract.create(
+        description: 'Food contract',
+        origin_planet: 'Calas',
+        destination_planet: 'Andvari',
+        value: 200,
+        pilot: pilot,
+        status: :completed,
+        resource: resource2
+      )
+    end
+
+    it 'returns the correct report data' do
+      expected_report = {
+        'Andvari' => {
+          'sent' => { 'water' => 10 },
+          'received' => { 'food' => 20 }
+        },
+        'Calas' => {
+          'sent' => { 'food' => 20 },
+          'received' => { 'water' => 10 }
+        }
+      }
+
+      expect(Contract.generate_report).to eq(expected_report)
+    end
+  end
 end
