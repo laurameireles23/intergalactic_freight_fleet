@@ -6,7 +6,7 @@ RSpec.describe ContractsController, type: :controller do
   describe 'POST #create' do
     let(:resource) do
       Resource.create(
-        name: 'Resource name',
+        name: 'water',
         weight: 10
       )
     end
@@ -105,7 +105,7 @@ RSpec.describe ContractsController, type: :controller do
 
     let(:resource) do
       Resource.create(
-        name: 'Water',
+        name: 'water',
         weight: 10
       )
     end

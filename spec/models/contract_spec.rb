@@ -6,7 +6,7 @@ RSpec.describe Contract, type: :model do
   describe 'validations' do
     let(:resource) do
       Resource.create(
-        name: 'Resource name',
+        name: 'water',
         weight: 10
       )
     end
@@ -113,7 +113,7 @@ RSpec.describe Contract, type: :model do
 
     let(:resource) do
       Resource.create(
-        name: 'Water',
+        name: 'water',
         weight: 10
       )
     end
@@ -171,7 +171,7 @@ RSpec.describe Contract, type: :model do
 
     let(:resource) do
       Resource.create!(
-        name: 'Water',
+        name: 'water',
         weight: 10,
         fuel_needed: 10
       )

@@ -7,7 +7,7 @@ RSpec.describe ResourcesController, type: :controller do
     let(:valid_resource_params) do
       {
         resource: {
-          name: 'Resource name',
+          name: 'water',
           weight: 10
         }
       }
@@ -37,7 +37,7 @@ RSpec.describe ResourcesController, type: :controller do
       it 'returns the created resource as JSON' do
         post :create, params: valid_resource_params
         json_response = JSON.parse(response.body)
-        expect(json_response['name']).to eq('Resource name')
+        expect(json_response['name']).to eq('water')
         expect(json_response['weight']).to eq(10)
       end
     end
