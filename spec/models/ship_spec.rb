@@ -91,5 +91,34 @@ RSpec.describe Ship, type: :model do
         expect(ship.fuel_level).to eq(30)
       end
     end
+
+    describe '#refuel' do
+      context 'when the pilot has enough credits' do
+        it 'increases the fuel level and reduces the pilot\'s credits' do
+          expect(ship.refuel(5)).to be true
+
+          ship.reload
+          pilot.reload
+
+          expect(ship.fuel_level).to eq(55)
+          expect(pilot.credits).to eq(65)
+        end
+      end
+
+      context 'when the pilot does not have enough credits' do
+        before { pilot.update!(credits: 10) }
+
+        it 'does not refuel the ship and returns false' do
+          expect(ship.refuel(5)).to be false
+
+          ship.reload
+          pilot.reload
+
+          expect(ship.fuel_level).to eq(50)
+          expect(pilot.credits).to eq(10)
+          expect(ship.errors[:base]).to include('Not enough credits to refuel.')
+        end
+      end
+    end
   end
 end
